@@ -137,7 +137,7 @@ auth.onAuthStateChanged((user) => {
                 return;
             }
             const isAdmin = user.uid === "admin_master_uid" || (data && data.name === "SuperAdmin");
-            
+
             initUserSession(
                 user.uid,
                 data ? data.name : "User",
@@ -229,7 +229,7 @@ function processAnyImageToCompressedDataURL(fileInput, callback) {
         img.onload = () => {
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
-            
+
             let width = img.width;
             let height = img.height;
             const maxDim = 1600;
@@ -257,7 +257,7 @@ function processAnyImageToCompressedDataURL(fileInput, callback) {
 function readFileAsDataURLWithLimit(fileInput, maxMB, callback) {
     const file = fileInput.files[0];
     if (!file) { callback(null); return; }
-    
+
     const maxSize = maxMB * 1024 * 1024;
     if (file.size > maxSize) {
         alert(`File size exceeds ${maxMB} MB limit! Please choose a smaller file.`);
@@ -327,6 +327,7 @@ function initUserSession(uid, username, avatar, bio, pinnedChats, blockedUsers, 
     authScreen.classList.add("hidden");
     appScreen.classList.remove("hidden");
 
+    syncViewportHeight();
     syncAllUsersChatsAndStatuses();
 }
 
@@ -336,7 +337,7 @@ function logoutUser() {
         currentChatId = null;
         appScreen.classList.add("hidden");
         authScreen.classList.remove("hidden");
-        toggleAuthMode('login');
+        if (typeof toggleAuthMode === "function") toggleAuthMode("login");
     });
 }
 
@@ -595,7 +596,7 @@ function switchChat(chatId, contact, isSaved) {
     chatSearchInput.value = "";
 
     const chatAreaEl = document.querySelector(".chat-area");
-    if (window.innerWidth <= 768) {
+    if (window.innerWidth <= 768 && chatAreaEl) {
         chatAreaEl.classList.add("mobile-active");
     }
 
@@ -1202,9 +1203,9 @@ function deleteAccount() {
     }
 }
 
-function openSettings() { 
+function openSettings() {
     settingTheme.value = document.documentElement.getAttribute("data-theme") || "dark";
-    settingsModal.classList.remove("hidden"); 
+    settingsModal.classList.remove("hidden");
 }
 function closeSettings() { settingsModal.classList.add("hidden"); }
 
@@ -1235,4 +1236,19 @@ function saveAppSettings() {
         alert("Settings saved!");
         closeSettings();
     }
+}
+
+function syncViewportHeight() {
+    const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    document.documentElement.style.setProperty("--app-height", `${vh}px`);
+    if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+}
+
+syncViewportHeight();
+window.addEventListener("resize", syncViewportHeight);
+if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", syncViewportHeight);
+    window.visualViewport.addEventListener("scroll", syncViewportHeight);
 }
