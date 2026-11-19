@@ -1,5 +1,5 @@
 // Zivo Chat Service Worker (sw.js)
-const CACHE_NAME = 'zivo-chat-v2';
+const CACHE_NAME = 'zivo-chat-v3';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
@@ -9,7 +9,6 @@ const ASSETS_TO_CACHE = [
     '/logo.png'
 ];
 
-// Install Event - Caching App Shell
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
@@ -19,7 +18,6 @@ self.addEventListener('install', (event) => {
     self.skipWaiting();
 });
 
-// Activate Event - Clean up old caches
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keyList) => {
@@ -35,11 +33,9 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Fetch Event - Serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET') return;
 
-    // Skip cross-origin requests (like Firebase Firestore/Auth/CDN calls)
     if (!event.request.url.startsWith(self.location.origin)) {
         return;
     }
